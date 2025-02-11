@@ -1,0 +1,84 @@
+@import "./lib/bootstrap/css/bootstrap.css";
+
+/* Style pour la navbar en bas */
+.navbar-bottom {
+    position: fixed; /* Fixer la navbar en bas */
+    bottom: 0; /* Coller la navbar en bas de la page */
+    left: 0;
+    width: 100%; /* Prendre toute la largeur */
+    background-color: #333; /* Couleur de fond de la navbar */
+    padding: 10px 0;
+    z-index: 9999; /* Assurez-vous qu'elle reste au-dessus du contenu */
+    display: flex; /* Utilisation de Flexbox pour aligner les éléments côte à côte */
+    justify-content: space-evenly; /* Espacement égal entre les éléments */
+    align-items: center; /* Aligner les éléments verticalement au centre */
+}
+
+.navbar-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+    text-align: center; /* Centrer le texte */
+    display: flex;
+    flex-direction: column; /* Organiser les icônes et le texte en colonne */
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar-link:hover {
+    color: #f1c40f; /* Changement de couleur au survol */
+}
+
+/* Style pour le lien actif */
+.navbar-link.active {
+    color: #f1c40f;  /* Couleur de survol ou couleur active */
+    font-weight: bold; /* Gras pour l'élément actif */
+}
+
+/* Pour les icônes dans la navbar active, vous pouvez aussi les styliser */
+.navbar-link.active i {
+    color: #f1c40f; /* Changer la couleur de l'icône pour l'élément actif */
+}
+
+
+.navbar-bottom .col {
+    display: flex;
+    flex-direction: column; /* Placer les éléments en colonne */
+    justify-content: center; /* Centrer chaque lien dans sa colonne */
+    align-items: center; /* Aligner verticalement le texte et l'icône */
+    padding: 0 15px;
+}
+
+.navbar-bottom .col i {
+    font-size: 24px; /* Ajuster la taille de l'icône */
+    margin-bottom: 5px; /* Espacement entre l'icône et le texte */
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Appliquer uniquement aux écrans réduits (max-width: 768px) */
+@media (max-width: 768px) {
+    .navbar-bottom {
+        justify-content: space-between; /* Espacement égal entre les éléments */
+        padding: 5px; /* Un peu moins de padding */
+    }
+
+    .navbar-bottom .col {
+        margin: 0 5px; /* Un peu de marge pour espacer les éléments */
+    }
+
+    .navbar-bottom .col:first-child,
+    .navbar-bottom .col:last-child {
+        margin-left: 10px;  /* Ajouter un léger espacement pour les liens "Acceuil" et "Favoris" */
+        margin-right: 10px;
+    }
+
+    .dropdown-toggle-text {
+        color: #ff5733; /* Remplacez cette couleur par celle de votre choix */
+    }
+}
