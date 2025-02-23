@@ -4,184 +4,152 @@ namespace App\Http\Controllers;
 
 use App\Models\Communication;
 use App\Models\Question;
+use App\Models\Speaker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QuestionController extends Controller
 {
     public function index()
     {
-        // Comptez les questions selon leur statut
-        $en_attente = Question::where('statut', 'en_attente')->count();
-        $valides_count = Question::where('statut', 'validée')->count();
-        $traitees = Question::where('statut', 'traitée')->count();
-        $rejetees = Question::where('statut', 'rejetée')->count();
+        // Count questions by status
+        $pending_count = Question::where('status', 'pending')->count();
+        $validated_count = Question::where('status', 'validated')->count();
+        $processed_count = Question::where('status', 'processed')->count();
+        $rejected_count = Question::where('status', 'rejected')->count();
 
-        // Récupérez les questions selon leur statut
-        $questions_en_attente = Question::where('statut', 'en_attente')->with(['communication', 'orateur'])->get();
-        $valides = Question::where('statut', 'validée')->with(['communication', 'orateur'])->get();
-        $questions_traitees = Question::where('statut', 'traitée')->with(['communication', 'orateur'])->get();
-        $questions_rejetees = Question::where('statut', 'rejetée')->with(['communication', 'orateur'])->get();
+        // Retrieve questions by status with relations
+        $pending_questions = Question::where('status', 'pending')->with(['communication', 'speaker'])->get();
+        $validated_questions = Question::where('status', 'validated')->with(['communication', 'speaker'])->get();
+        $processed_questions = Question::where('status', 'processed')->with(['communication', 'speaker'])->get();
+        $rejected_questions = Question::where('status', 'rejected')->with(['communication', 'speaker'])->get();
 
-        // Passez toutes les variables à la vue
         return view('questions.index', compact(
-            'en_attente',
-            'valides_count',
-            'traitees',
-            'rejetees',
-            'questions_en_attente',
-            'valides',
-            'questions_traitees',
-            'questions_rejetees'
+            'pending_count',
+            'validated_count',
+            'processed_count',
+            'rejected_count',
+            'pending_questions',
+            'validated_questions',
+            'processed_questions',
+            'rejected_questions'
         ));
     }
 
-
     public function create(Request $request)
     {
-        // Récupère toutes les communications
         $communications = Communication::all();
-        $orateurs = collect();  // Initialisation d'une collection vide pour les orateurs
+        $speakers = Speaker::all();
 
-        // Si une communication est sélectionnée, récupérer ses orateurs
-        if ($request->has('communication_id') && $request->communication_id) {
-            $communication = Communication::find($request->communication_id);
-            if ($communication) {
-                // Récupère les orateurs associés à la communication sélectionnée
-                $orateurs = $communication->orateurs; // Utilisation de la relation many-to-many
-            }
-        }
-
-        return view('questions.create', compact('communications', 'orateurs'));
+        return view('questions.create', compact('communications', 'speakers'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'contenu' => 'required|string',
+            'content' => 'required|string',
             'communication_id' => 'required|exists:communications,id',
-            'orateur_id' => 'nullable|exists:orateurs,id',
+            'speaker_id' => 'nullable|exists:speakers,id',
         ]);
 
-        // Créer la question
-        Question::create($validated);
+        Question::create(array_merge($validated, ['status' => 'pending', 'user_id' => Auth::user()->id]));
 
-        return redirect()->route('questions.create')->with('success', 'Votre question a été soumise.');
+        return redirect()->route('questions.index')->with('success', 'Your question has been submitted.');
     }
 
-    public function getOrateurs($communicationId)
-    {
-        // Trouver la communication avec ses orateurs
-        $communication = Communication::with('orateurs')->find($communicationId);
-
-        if (!$communication) {
-            return response()->json([], 404); // Retourner une réponse vide si la communication n'existe pas
-        }
-
-        // Retourner les orateurs au format JSON
-        return response()->json($communication->orateurs);
-    }
-
-    public function showCommunicationWithOrateurs($id)
-    {
-        // Récupérer la communication avec ses orateurs associés
-        $communication = Communication::with('orateurs')->find($id);
-
-        // Vérifier si la communication existe
-        if (!$communication) {
-            return redirect()->back()->with('error', 'Communication non trouvée.');
-        }
-
-        // Passer la communication et les orateurs à la vue
-        return view('communications.show', compact('communication', 'communication->orateurs'));
-    }
-
-    public function valider($id)
+    public function validateQuestion($id)
     {
         $question = Question::find($id);
 
         if (!$question) {
-            return redirect()->back()->with('error', 'Question non trouvée.');
+            return redirect()->back()->with('error', 'Question not found.');
         }
 
-        $question->statut = 'validée';
+        $question->status = 'validated';
         $question->save();
 
-        return redirect()->route('questions.index')->with('success', 'Question validée avec succès.');
+        return redirect()->route('questions.index')->with('success', 'Question validated successfully.');
     }
 
-    public function rejeter($id)
+    public function reject($id)
     {
         $question = Question::find($id);
 
         if (!$question) {
-            return redirect()->back()->with('error', 'Question non trouvée.');
+            return redirect()->back()->with('error', 'Question not found.');
         }
 
-        $question->statut = 'rejetée';
+        $question->status = 'rejected';
         $question->save();
 
-        return redirect()->route('questions.index')->with('success', 'Question rejetée avec succès.');
+        return redirect()->route('questions.index')->with('success', 'Question rejected successfully.');
     }
 
-
-    public function traiter($id)
+    public function process($id)
     {
         $question = Question::find($id);
 
-        if (!$question || $question->statut != 'validée') {
-            return redirect()->back()->with('error', 'Impossible de marquer la question comme traitée.');
+        if (!$question || $question->status != 'validated') {
+            return redirect()->back()->with('error', 'Cannot mark this question as processed.');
         }
 
-        // Stocker la réponse directement
-        $question->statut = 'traitée';
-        $question->reponse = 'Réponse donnée oralement par l’orateur.'; // La réponse par défaut
+        $question->status = 'processed';
+        $question->answer = 'Answered verbally by the speaker.';
         $question->save();
 
-        return redirect()->route('questions.index')->with('success', 'La question a été marquée comme traitée et la réponse a été enregistrée.');
+        return redirect()->route('questions.index')->with('success', 'The question has been processed and the response recorded.');
     }
 
-        public function updateRejetee(Request $request, $id)
+    public function updateRejected(Request $request, $id)
     {
         $question = Question::find($id);
 
-        if (!$question || $question->statut != 'rejetée') {
-            return redirect()->back()->with('error', 'Impossible de modifier cette question.');
+        if (!$question || $question->status != 'rejected') {
+            return redirect()->back()->with('error', 'Cannot modify this question.');
         }
 
-        // Valider le contenu mis à jour
         $validated = $request->validate([
-            'contenu' => 'required|string',
+            'content' => 'required|string',
         ]);
 
-        // Mettre à jour la question et la valider
-        $question->contenu = $validated['contenu'];
-        $question->statut = 'validée';
+        $question->content = $validated['content'];
+        $question->status = 'validated';
         $question->save();
 
-        return redirect()->route('questions.index')->with('success', 'La question a été modifiée et validée.');
+        return redirect()->route('questions.index')->with('success', 'The question has been updated and validated.');
     }
 
-        public function repondre(Request $request, $id)
+    public function respond(Request $request, $id)
     {
-        // Récupérer la question
         $question = Question::find($id);
 
-        if (!$question || $question->statut != 'validée') {
-            return redirect()->back()->with('error', 'Impossible de répondre à cette question.');
+        if (!$question || $question->status != 'validated') {
+            return redirect()->back()->with('error', 'Cannot respond to this question.');
         }
 
-        // Validation de la réponse
         $validated = $request->validate([
-            'reponse' => 'required|string',
+            'answer' => 'required|string',
         ]);
 
-        // Mettre à jour la question avec la réponse manuelle
-        $question->reponse = $validated['reponse'];
-        $question->statut = 'traitée';  // Marquer la question comme traitée
+        $question->answer = $validated['answer'];
+        $question->status = 'processed';
         $question->save();
 
-        return redirect()->route('questions.index')->with('success', 'La question a été traitée et la réponse a été enregistrée.');
+        return redirect()->route('questions.index')->with('success', 'The question has been processed and the response recorded.');
     }
+    public function update(Request $request, Question $question)
+    {
 
+        $request->validate([
+            'content' => 'required|string|max:255',
+        ]);
 
+        $question->update([
+            'content' => $request->content,
+            'status' => 'validated',
+
+        ]);
+
+        return redirect()->back()->with('success', __('interface.question_updated'));
+    }
 }

@@ -1,66 +1,101 @@
 @extends('base')
 
-@section('title', 'Détails de la Communication')
-
 @section('content')
-<div class="container mt-4">
-    <!-- Titre de la communication -->
-    <div class="text-center mb-5">
-        <h1 class="display-4">{{ $communication->titre }}</h1>
-        <p class="text-muted">{{ $communication->description }}</p>
-    </div>
+<div class="container">
+    <h1>{{ $communication->title }}</h1>
 
-    <!-- Informations sur la communication -->
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <p><strong>Date et horaire :</strong></p>
-                    <p>{{ $communication->heure_debut }} - {{ $communication->heure_fin }}</p>
-                    <p><strong>Salle :</strong> {{ $communication->salle->nom ?? 'Non spécifiée' }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ __('interface.communication_details') }}</h5>
 
-    <!-- Orateurs -->
-    <h2 class="mb-4">Orateurs</h2>
-    @if ($communication->orateurs->isNotEmpty())
-        <div class="d-flex flex-wrap justify-content-start gap-4 mb-5">
-            @foreach ($communication->orateurs as $orateur)
-                <a href="{{ route('orateurs.show', $orateur->id) }}" class="text-decoration-none text-dark">
-                    <div class="text-center">
-                        <img
-                            src="{{ $orateur->photo ? asset('storage/' . $orateur->photo) : asset('storage/images/avatar2.jpg') }}"
-                            alt="{{ $orateur->nom_complet }}"
-                            class="rounded-circle mb-2"
-                            style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #ddd;">
-                        <p class="mb-0">{{ $orateur->nom_complet }}</p>
-                    </div>
-                </a>
-            @endforeach
-        </div>
-    @else
-        <p class="text-muted">Aucun orateur pour cette communication.</p>
-    @endif
+            <p><strong>{{ __('interface.description') }}:</strong> {{ $communication->description ?? __('interface.no_description') }}</p>
+            <p><strong>{{ __('interface.date') }}:</strong> {{ $communication->date }}</p>
+            <p><strong>{{ __('interface.start_time') }}:</strong> {{ $communication->start_time }}</p>
+            <p><strong>{{ __('interface.end_time') }}:</strong> {{ $communication->end_time }}</p>
+            <p><strong>{{ __('interface.type') }}:</strong> {{ $communication->type }}</p>
 
-    <!-- Questions traitées -->
-    <h2 class="mb-4">Questions traitées</h2>
-    @if ($communication->questions->isNotEmpty())
-        <div class="row">
-            @foreach ($communication->questions as $question)
-                <div class="col-md-6">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-body">
-                            <p><strong>Question :</strong> {{ $question->contenu }}</p>
-                            <p><strong>Réponse :</strong> {{ $question->reponse ?? 'Pas encore de réponse' }}</p>
+            <hr>
+
+            <!-- Program Session -->
+            <h5>{{ __('interface.program_session') }}</h5>
+            @if ($communication->programSession)
+                <p>
+                    <a href="{{ route('program_sessions.show', $communication->programSession) }}">
+                        {{ $communication->programSession->name }}
+                    </a>
+                </p>
+            @else
+                <p>{{ __('interface.not_assigned') }}</p>
+            @endif
+
+            <!-- Room -->
+            <h5>{{ __('interface.room') }}</h5>
+            @if ($communication->room)
+                <p>
+                    <a href="{{ route('rooms.show', $communication->room) }}">
+                        {{ $communication->room->name }}
+                    </a>
+                </p>
+            @else
+                <p>{{ __('interface.not_assigned') }}</p>
+            @endif
+
+            <hr>
+
+            <!-- Speakers -->
+            <h5>{{ __('interface.speakers') }}</h5>
+            @if ($communication->speakers->isNotEmpty())
+                <div class="row">
+                    @foreach ($communication->speakers as $speaker)
+                        <div class="col-md-4 text-center">
+                            <a href="{{ route('speakers.show', $speaker) }}">
+                                <img src="{{ $speaker->avatar?->original_url }}" alt="{{ $speaker->full_name }}" class="rounded-circle img-fluid" style="width: 80px; height: 80px;">
+                                <p>{{ $speaker->full_name }}</p>
+                            </a>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            @else
+                <p>{{ __('interface.no_speakers') }}</p>
+            @endif
+
+            <hr>
+
+            <!-- Sponsors -->
+            <h5>{{ __('interface.sponsors') }}</h5>
+            @if ($communication->sponsors->isNotEmpty())
+                <div class="row">
+                    @foreach ($communication->sponsors as $sponsor)
+                        <div class="col-md-4 text-center">
+                            <a href="{{ route('sponsors.show', $sponsor) }}">
+                                <img src="{{ $sponsor->logo?->original_url }}" alt="{{ $sponsor->name }}" class="img-fluid" style="max-height: 60px;">
+                                <p>{{ $sponsor->name }}</p>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p>{{ __('interface.no_sponsors') }}</p>
+            @endif
         </div>
-    @else
-        <p class="text-muted">Aucune question traitée pour cette communication.</p>
-    @endif
+    </div>
+
+    <div class="mt-4">
+        @if(auth()->check() && auth()->user()->can('update Communication'))
+            <a href="{{ route('communications.edit', $communication) }}" class="btn btn-primary">{{ __('interface.edit') }}</a>
+        @endif
+
+        @if(auth()->check() && auth()->user()->can('delete Communication'))
+            <form action="{{ route('communications.destroy', $communication) }}" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('interface.delete_confirmation') }}');">
+                    {{ __('interface.delete') }}
+                </button>
+            </form>
+        @endif
+
+        <a href="{{ route('communications.index') }}" class="btn btn-secondary">{{ __('interface.back') }}</a>
+    </div>
 </div>
 @endsection

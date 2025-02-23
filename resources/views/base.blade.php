@@ -1,36 +1,41 @@
 <!DOCTYPE html>
+<html lang="{{ config('app.locale') }}" locale="{{ session('applocale') }}">
 
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name') }} - @yield('title')</title>
 
-        <title> {{ config('app.name') }} - @yield('title') </title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('assets/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/styles.css') }}"> <!-- Nouveau fichier pour le CSS -->
 
-        <link rel="stylesheet" href="{{ asset('assets/app.css') }}">
-    </head>
+    <!-- Bootstrap (si nécessaire) -->
+    <link rel="stylesheet" href="{{ asset('lib/bootstrap/css/bootstrap.css') }}">
+</head>
 
-    <body>
+<body>
 
+    <!-- Conteneur principal -->
+    <div class="app-container">
+        <!-- Navbar -->
         @include('nav/navbar')
 
-        @yield('content')
+        <!-- Contenu principal -->
+        <main class="content">
+            @yield('content')
+        </main>
 
-        @include('script')
-    </body>
-    <style>
-        /* Dégradé du bleu clair au vert clair */
-        body {
-            background: linear-gradient(to bottom, #4A90E2, #50E3C2);
-            height: 100vh; /* Remplir toute la hauteur de la fenêtre */
-            margin: 0;
-            color: #FFFFFF; /* Texte blanc */
-        }
+        <!-- Navbar sticky en bas -->
+        @include('nav/navbar-bottom')
+    </div>
 
-    </style>
+    <!-- Scripts -->
+    @include('script')
 
+</body>
 </html>

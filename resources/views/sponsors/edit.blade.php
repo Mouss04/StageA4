@@ -1,111 +1,87 @@
 @extends('base')
 
+@section('title', __('interface.edit_sponsor'))
+
 @section('content')
-    <div class="container">
-        <h1>Modifier l'exposant</h1>
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+<div class="container mt-5">
+    <h1>{{ __('interface.edit_sponsor') }}</h1>
 
-        <form action="{{ route('sponsors.update', $sponsor->id) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-
-            <div class="form-group">
-                <label for="nom">Nom de l'exposant</label>
-                <input type="text" id="nom" name="nom" class="form-control" value="{{ old('nom', $sponsor->nom) }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="category">Catégorie</label>
-                <select id="category" name="category" class="form-control">
-                    @include('components.category-options', ['category' => old('category', $sponsor->category)])
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" class="form-control">{{ old('description', $sponsor->description) }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="logo">Logo</label>
-                <input type="file" id="logo" name="logo" class="form-control">
-                @if($sponsor->logo)
-                    <p>Logo actuel : <img src="{{ asset('storage/' . $sponsor->logo) }}" width="50"></p>
-                @endif
-            </div>
-
-            <div class="form-group">
-                <label for="fichier">Fichiers</label>
-                <input type="file" id="fichier" name="fichier[]" class="form-control" multiple>
-                @if($sponsor->fichier)
-                    <p>Fichiers actuels :</p>
-                    @foreach (json_decode($sponsor->fichier) as $fichier)
-                        <p>{{ basename($fichier) }}</p>
-                    @endforeach
-                @endif
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-3">Mettre à jour</button>
-        </form>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
+    @endif
 
-    <!-- Ajouter des styles CSS spécifiques à cette vue -->
-    @section('styles')
-    <style>
-        /* Exemple de styles CSS ajoutés directement dans la vue */
-        body {
-            background-color: #f9f9f9;  /* Changer la couleur de fond */
-        }
+    <form method="POST" action="{{ route('sponsors.update', $sponsor->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-        .container {
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+        <div class="mb-3">
+            <label for="name" class="form-label">{{ __('interface.sponsor_name') }}</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $sponsor->name) }}" required>
+        </div>
 
-        h1 {
-            font-size: 2rem;
-            color: #333;
-        }
+        <div class="mb-3">
+            <label for="category" class="form-label">{{ __('interface.category') }}</label>
+            <select id="category" name="category" class="form-control">
+                <option value="">{{ __('interface.select_category') }}</option>
+                <option value="medical_devices" {{ old('category') == 'medical_devices' ? 'selected' : '' }}>
+                    {{ __('interface.medical_devices') }}
+                </option>
+                <option value="pharmaceutical_distributors" {{ old('category') == 'pharmaceutical_distributors' ? 'selected' : '' }}>
+                    {{ __('interface.pharmaceutical_distributors') }}
+                </option>
+                <option value="parapharmacy_phytotherapy" {{ old('category') == 'parapharmacy_phytotherapy' ? 'selected' : '' }}>
+                    {{ __('interface.parapharmacy_phytotherapy') }}
+                </option>
+                <option value="hospital_pharmacy" {{ old('category') == 'hospital_pharmacy' ? 'selected' : '' }}>
+                    {{ __('interface.hospital_pharmacy') }}
+                </option>
+                <option value="publishing" {{ old('category') == 'publishing' ? 'selected' : '' }}>
+                    {{ __('interface.publishing') }}
+                </option>
+                <option value="pharmaceutical_laboratories" {{ old('category') == 'pharmaceutical_laboratories' ? 'selected' : '' }}>
+                    {{ __('interface.pharmaceutical_laboratories') }}
+                </option>
+                <option value="childcare_infant_milk" {{ old('category') == 'childcare_infant_milk' ? 'selected' : '' }}>
+                    {{ __('interface.childcare_infant_milk') }}
+                </option>
+                <option value="services" {{ old('category') == 'services' ? 'selected' : '' }}>
+                    {{ __('interface.services') }}
+                </option>
+                <option value="pharmaceutical_industry_suppliers" {{ old('category') == 'pharmaceutical_industry_suppliers' ? 'selected' : '' }}>
+                    {{ __('interface.pharmaceutical_industry_suppliers') }}
+                </option>
+                <option value="institutions_partners" {{ old('category') == 'institutions_partners' ? 'selected' : '' }}>
+                    {{ __('interface.institutions_partners') }}
+                </option>
+            </select>
+        </div>
 
-        .form-group {
-            margin-bottom: 15px;
-        }
 
-        .form-control {
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
+        <div class="mb-3">
+            <label for="description" class="form-label">{{ __('interface.description') }}</label>
+            <textarea id="description" name="description" class="form-control">{{ old('description', $sponsor->description) }}</textarea>
+        </div>
 
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            padding: 10px 15px;
-            border-radius: 5px;
-        }
+        <div class="mb-3">
+            <label for="logo" class="form-label">{{ __('interface.logo') }}</label>
+            <input type="file" id="logo" name="logo" class="form-control">
+            @if ($sponsor->logo)
+            <div class="mt-2">
+                <img src="{{ $sponsor->logo->getUrl() }}" alt="Logo" width="100">
+            </div>
+            @endif
+        </div>
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
+        <button type="submit" class="btn btn-success">{{ __('interface.update') }}</button>
+        <a href="{{ route('sponsors.index') }}" class="btn btn-secondary">{{ __('interface.cancel') }}</a>
+    </form>
+</div>
 
-        /* Ajouter un style pour l'élément d'alerte des erreurs */
-        .alert-danger {
-            margin-top: 20px;
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-    @endsection
 @endsection

@@ -1,84 +1,93 @@
-@import "./lib/bootstrap/css/bootstrap.css";
-
-/* Style pour la navbar en bas */
-.navbar-bottom {
-    position: fixed; /* Fixer la navbar en bas */
-    bottom: 0; /* Coller la navbar en bas de la page */
-    left: 0;
-    width: 100%; /* Prendre toute la largeur */
-    background-color: #333; /* Couleur de fond de la navbar */
-    padding: 10px 0;
-    z-index: 9999; /* Assurez-vous qu'elle reste au-dessus du contenu */
-    display: flex; /* Utilisation de Flexbox pour aligner les éléments côte à côte */
-    justify-content: space-evenly; /* Espacement égal entre les éléments */
-    align-items: center; /* Aligner les éléments verticalement au centre */
+/* Dégradé du bleu clair au vert clair */
+body {
+    background: linear-gradient(to bottom, #4A90E2, #50E3C2);
+    margin: 0;
+    color: #FFFFFF;
+    font-family: 'Figtree', sans-serif;
 }
 
+/* Conteneur principal qui occupe 100% de la hauteur de la fenêtre */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Assurez-vous qu'il remplit toute la hauteur */
+}
+
+/* Zone de contenu principal - Permet le scroll du contenu */
+.content {
+    flex: 1; /* Permet au contenu de prendre tout l'espace disponible */
+    overflow-y: auto; /* Active le scroll si nécessaire */
+    padding-bottom: 70px; /* Assurez-vous que la navbar ne cache pas le contenu */
+}
+
+/* Navbar sticky en bas */
+.navbar-bottom {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+/* Liens de la navbar */
 .navbar-link {
     color: #fff;
     text-decoration: none;
     font-size: 18px;
     transition: color 0.3s ease;
-    text-align: center; /* Centrer le texte */
+    text-align: center;
     display: flex;
-    flex-direction: column; /* Organiser les icônes et le texte en colonne */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
 .navbar-link:hover {
-    color: #f1c40f; /* Changement de couleur au survol */
+    color: #f1c40f;
 }
 
-/* Style pour le lien actif */
+/* Élément actif dans la navbar */
 .navbar-link.active {
-    color: #f1c40f;  /* Couleur de survol ou couleur active */
-    font-weight: bold; /* Gras pour l'élément actif */
+    color: #f1c40f;
+    font-weight: bold;
 }
 
-/* Pour les icônes dans la navbar active, vous pouvez aussi les styliser */
 .navbar-link.active i {
-    color: #f1c40f; /* Changer la couleur de l'icône pour l'élément actif */
+    color: #f1c40f;
 }
-
 
 .navbar-bottom .col {
     display: flex;
-    flex-direction: column; /* Placer les éléments en colonne */
-    justify-content: center; /* Centrer chaque lien dans sa colonne */
-    align-items: center; /* Aligner verticalement le texte et l'icône */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding: 0 15px;
 }
 
 .navbar-bottom .col i {
-    font-size: 24px; /* Ajuster la taille de l'icône */
-    margin-bottom: 5px; /* Espacement entre l'icône et le texte */
+    font-size: 24px;
+    margin-bottom: 5px;
 }
 
-.row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Appliquer uniquement aux écrans réduits (max-width: 768px) */
+/* Responsive */
 @media (max-width: 768px) {
     .navbar-bottom {
-        justify-content: space-between; /* Espacement égal entre les éléments */
-        padding: 5px; /* Un peu moins de padding */
+        justify-content: space-between;
+        padding: 5px;
     }
 
     .navbar-bottom .col {
-        margin: 0 5px; /* Un peu de marge pour espacer les éléments */
+        margin: 0 5px;
     }
 
     .navbar-bottom .col:first-child,
     .navbar-bottom .col:last-child {
-        margin-left: 10px;  /* Ajouter un léger espacement pour les liens "Acceuil" et "Favoris" */
+        margin-left: 10px;
         margin-right: 10px;
-    }
-
-    .dropdown-toggle-text {
-        color: #ff5733; /* Remplacez cette couleur par celle de votre choix */
     }
 }

@@ -5,53 +5,53 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles, InteractsWithMedia;
 
     /**
-     * Les rôles définis dans l'application.
-     */
-    const ROLE_ADMIN = 'admin';
-    const ROLE_ORATEUR = 'orateur';
-    const ROLE_SPONSOR = 'sponsor';
-    const ROLE_VISITEUR = 'visiteur';
-
-    /**
-     * Les attributs assignables en masse.
+     * Mass assignable attributes.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'nom_complet',
-        'surnom',
+        'job_title',
+        'scanned',
+        'full_name',
+        'nickname',
         'email',
-        'motdepasse',
-        'photo',
-        'role', // Permet d'assigner un rôle
+        'password',
+        'institution',
+        'address',
+        'country',
+        'state',
     ];
 
     /**
-     * Les attributs cachés pour la sérialisation.
+     * Hidden attributes for serialization.
      *
      * @var array<int, string>
      */
     protected $hidden = [
-        'motdepasse',
+        'password',
         'remember_token',
     ];
 
     /**
-     * Obtenir le mot de passe pour l'authentification.
+     * Get the user's name.
      */
-    public function getAuthPassword()
+    public function getNameAttribute()
     {
-        return $this->motdepasse; // Indique à Laravel que le champ du mot de passe est `motdepasse`
+        return $this->nickname ?: $this->full_name;
     }
 
     /**
-     * Les attributs qui doivent être castés.
+     * Attributes that should be cast.
      *
      * @var array<string, string>
      */
@@ -60,45 +60,24 @@ class User extends Authenticatable
     ];
 
     /**
-     * Vérifie si l'utilisateur a un rôle spécifique.
-     *
-     * @param string $role
-     * @return bool
+     * Get the user's questions.
      */
-    public function hasRole(string $role): bool
+    public function questions()
     {
-        return strtolower(trim($this->role)) === strtolower(trim($role));
+        return $this->hasMany(Question::class);
     }
 
     /**
-     * Vérifie si l'utilisateur est admin.
+     * Get the user's avatar.
      */
-    public function isAdmin(): bool
+    public function avatar()
     {
-        return $this->hasRole(self::ROLE_ADMIN);
+        return $this->morphOne(Media::class, 'model')->where('collection_name', 'avatar');
     }
 
-    /**
-     * Vérifie si l'utilisateur est orateur.
-     */
-    public function isOrateur(): bool
-    {
-        return $this->hasRole(self::ROLE_ORATEUR);
-    }
 
-    /**
-     * Vérifie si l'utilisateur est sponsor.
-     */
-    public function isSponsor(): bool
+    public function programSessions()
     {
-        return $this->hasRole(self::ROLE_SPONSOR);
-    }
-
-    /**
-     * Vérifie si l'utilisateur est visiteur.
-     */
-    public function isVisiteur(): bool
-    {
-        return $this->hasRole(self::ROLE_VISITEUR);
+        return $this->belongsToMany(ProgramSession::class, 'moderator_program_session','program_session_id','user_id');
     }
 }

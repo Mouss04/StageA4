@@ -2,39 +2,66 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Communication extends Model
 {
+    use HasFactory;
+
+    /**
+     * Mass assignable attributes.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'titre',
+        'title',
         'description',
         'date',
-        'heure_debut',
-        'heure_fin',
+        'start_time',
+        'end_time',
         'type',
-        'sessis_id',
-        'salle_id'
+        'program_session_id',
+        'room_id',
     ];
 
-    public function session()
+    /**
+     * Get the program session associated with the communication.
+     */
+    public function programSession()
     {
-        return $this->belongsTo(Sessi::class, 'sessis_id');
+        return $this->belongsTo(ProgramSession::class, 'program_session_id');
     }
 
-    public function salle()
+    /**
+     * Get the room associated with the communication.
+     */
+    public function room()
     {
-        return $this->belongsTo(Salle::class);
+        return $this->belongsTo(Room::class);
     }
 
-    // Définir la relation many-to-many avec Orateur
-    public function orateurs()
+    /**
+     * Get the speakers associated with the communication.
+     */
+    public function speakers()
     {
-        return $this->belongsToMany(Orateur::class, 'communications_orateurs', 'communication_id', 'orateur_id');
+        return $this->belongsToMany(Speaker::class, 'communication_speaker', 'communication_id', 'speaker_id');
     }
 
+    /**
+     * Get the questions related to the communication.
+     */
     public function questions()
     {
         return $this->hasMany(Question::class, 'communication_id');
+    }
+
+    /**
+     * Get the sponsors associated with the communication.
+     */
+    public function sponsors()
+    {
+        return $this->belongsToMany(Sponsor::class, 'communication_sponsor', 'communication_id', 'sponsor_id');
     }
 }

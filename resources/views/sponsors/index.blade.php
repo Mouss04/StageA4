@@ -1,110 +1,130 @@
 @extends('base')
 
+@section('title', __('interface.sponsor_management'))
+
 @section('content')
-    <div class="container">
-        <h1>Exposants</h1>
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+<div class="container mt-5">
+    <h1>{{ __('interface.sponsor_management') }}</h1>
 
-        <!-- Formulaire combiné de recherche et filtrage -->
-        <form method="GET" action="{{ route('sponsors.index') }}" class="mb-4">
-            <div class="row">
-                <!-- Champ de recherche -->
-                <div class="col-md-6">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher un exposant"
-                           value="{{ request()->get('search') }}">
+    <!-- Message de succès -->
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    <!-- Formulaire de recherche -->
+    <form method="GET" action="{{ route('sponsors.index') }}" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="{{ __('interface.search_sponsor') }}" value="{{ request()->query('search') }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-search"></i> {{ __('interface.search') }}
+            </button>
+        </div>
+    </form>
+
+    @if(auth()->check() && auth()->user()->can('create Sponsor'))
+    <a href="{{ route('sponsors.create') }}" class="btn btn-primary mb-3">{{ __('interface.add_sponsor') }}</a>
+    @endif
+
+    @if(auth()->check() && auth()->user()->hasRole('admin'))
+    <!-- Table des sponsors pour les admins -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{{ __('interface.name') }}</th>
+                <th>{{ __('interface.category') }}</th>
+                <th>{{ __('interface.description') }}</th>
+                <th>{{ __('interface.logo') }}</th>
+                <th>{{ __('interface.actions') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($sponsors as $sponsor)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $sponsor->name }}</td>
+                <td>{{ $sponsor->category ?? __('interface.not_available') }}</td>
+                <td>{{ Str::limit($sponsor->description, 50, '...') }}</td>
+                <td>
+                    @if ($sponsor->getFirstMediaUrl('logo'))
+                    <img src="{{ $sponsor->getFirstMediaUrl('logo') }}" alt="Logo" width="50">
+                    @else
+                    <span>{{ __('interface.no_logo') }}</span>
+                    @endif
+                </td>
+                <td>
+                    @if(auth()->check() && auth()->user()->can('create Favorite'))
+                    <x-favorite-button modelType="App\Models\Sponsor" :modelId="$sponsor->id" />
+                    @endif
+
+                    @if(auth()->check() && auth()->user()->can('update Sponsor'))
+                    <a href="{{ route('sponsors.edit', $sponsor->id) }}" class="btn btn-warning btn-sm">{{ __('interface.edit') }}</a>
+                    @endif
+
+                    @if(auth()->check() && auth()->user()->can('delete Sponsor'))
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSponsorModal{{ $sponsor->id }}">
+                        {{ __('interface.delete') }}
+                    </button>
+
+                    <!-- Modal de confirmation -->
+                    <div class="modal fade" id="deleteSponsorModal{{ $sponsor->id }}" tabindex="-1" aria-labelledby="deleteSponsorLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteSponsorLabel">{{ __('interface.confirm_delete') }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {{ __('interface.confirm_delete_message', ['name' => $sponsor->name]) }}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('interface.cancel') }}</button>
+                                    <form action="{{ route('sponsors.destroy', $sponsor->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">{{ __('interface.delete') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+    <!-- Vue en cartes pour les visiteurs et modérateurs -->
+    <div class="row">
+        @foreach ($sponsors as $sponsor)
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                @if ($sponsor->getFirstMediaUrl('logo'))
+                <img src="{{ $sponsor->getFirstMediaUrl('logo') }}" class="card-img-top" alt="Logo">
+                @endif
+                <div class="card-body">
+                    <h5 class="card-title">{{ $sponsor->name }}</h5>
+                    <p class="card-text"><strong>{{ __('interface.category') }}:</strong> {{ $sponsor->category ?? __('interface.not_available') }}</p>
+                    <p class="card-text">{{ Str::limit($sponsor->description, 80, '...') }}</p>
+                    @if(auth()->check() && auth()->user()->can('create Favorite'))
+                    <x-favorite-button modelType="App\Models\Sponsor" :modelId="$sponsor->id" />
+                    @endif
+                    <a href="{{ route('sponsors.show', $sponsor->id) }}" class="btn btn-info btn-sm">{{ __('interface.view') }}</a>
                 </div>
-
-                <!-- Menu déroulant pour les catégories -->
-                <div class="col-md-4">
-                    <select name="category" class="form-control">
-                        <option value="">Toutes les catégories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->category }}"
-                                    @if(request()->get('category') == $category->category) selected @endif>
-                                {{ $category->category }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Bouton de soumission -->
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
-                </div>
-            </div>
-        </form>
-
-        <!-- Boutons de catégorie sous forme de bulles -->
-        <div class="category-buttons mb-4">
-            <h4>Catégories rapides</h4>
-            <div class="d-flex flex-wrap">
-                <!-- Lien pour afficher tous les sponsors -->
-                <a href="{{ route('sponsors.index') }}" class="btn btn-warning btn-sm m-2 {{ request()->get('category') ? '' : 'active' }}">
-                    Toutes les catégories
-                </a>
-                @foreach($categories as $category)
-                    <a href="{{ route('sponsors.index', ['category' => $category->category]) }}"
-                       class="btn btn-info btn-sm m-2 {{ request()->get('category') == $category->category ? 'active' : '' }}">
-                        {{ $category->category }}
-                    </a>
-                @endforeach
             </div>
         </div>
-
-        <!-- Lien pour ajouter un sponsor -->
-        <a href="{{ route('sponsors.create') }}" class="btn btn-primary mb-3">Ajouter un exposant</a>
-
-        <!-- Tableau des sponsors -->
-        <table class="table mt-4">
-            <thead>
-                <tr>
-                    <th>Logo</th>
-                    <th>Nom</th>
-                    <th>Catégorie</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($sponsors as $sponsor)
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                @if($sponsor->logo)
-                                    <img src="{{ asset('storage/' . $sponsor->logo) }}" alt="Logo"
-                                         style="width: 120px; height: 120px; object-fit: contain; margin-right: 10px;" />
-                                @else
-                                    <span class="badge badge-secondary"
-                                          style="width: 120px; height: 120px; display: block; margin-right: 10px;">
-                                        No Logo
-                                    </span>
-                                @endif
-                            </div>
-                        </td>
-                        <td>{{ $sponsor->nom }}</td>
-                        <td>{{ $sponsor->category }}</td>
-                        <td>{{ $sponsor->description }}</td>
-                        <td>
-                            <a href="{{ route('sponsors.edit', $sponsor->id) }}" class="btn btn-warning btn-sm">Modifier</a>
-                            <form action="{{ route('sponsors.destroy', $sponsor->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce sponsor?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="text-center">Aucun exposant trouvé.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        @endforeach
     </div>
+    @endif
+
+    <!-- Pagination -->
+    <div class="mt-3">
+        {{ $sponsors->appends(['search' => request()->query('search')])->links() }}
+    </div>
+</div>
+
 @endsection

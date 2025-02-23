@@ -1,92 +1,96 @@
 @extends('base')
 
-@section('title', 'Modifier la Communication')
-
 @section('content')
 <div class="container">
-    <h1>Modifier la communication : {{ $communication->titre }}</h1>
+    <h1>{{ __('interface.edit_communication') }}</h1>
 
-    <form action="{{ route('communications.update', $communication->id) }}" method="POST">
+    @php $communication = $communication ?? new \App\Models\Communication; @endphp
+
+    <form method="POST" action="{{ route('communications.update', $communication) }}">
         @csrf
         @method('PUT')
 
-        <!-- Champ Titre -->
         <div class="mb-3">
-            <label for="titre" class="form-label">Titre</label>
-            <input type="text" class="form-control" id="titre" name="titre" value="{{ old('titre', $communication->titre) }}" required>
-            @error('titre')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
+            <label for="title" class="form-label">{{ __('interface.title') }}</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $communication->title) }}" required>
         </div>
 
-        <!-- Champ Description -->
         <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
+            <label for="description" class="form-label">{{ __('interface.description') }}</label>
             <textarea class="form-control" id="description" name="description">{{ old('description', $communication->description) }}</textarea>
         </div>
 
-        <!-- Champ Type -->
         <div class="mb-3">
-            <label for="type" class="form-label">Type</label>
-            <select class="form-control" id="type" name="type" required>
-                <option value="communication" {{ $communication->type == 'communication' ? 'selected' : '' }}>Communication</option>
-                <option value="symposium" {{ $communication->type == 'symposium' ? 'selected' : '' }}>Symposium</option>
-                <option value="atelier" {{ $communication->type == 'atelier' ? 'selected' : '' }}>Atelier</option>
-                <option value="pause" {{ $communication->type == 'pause' ? 'selected' : '' }}>Pause</option>
-            </select>
-        </div>
-
-        <!-- Champ Salle -->
-        <div class="mb-3">
-            <label for="salle_id" class="form-label">Salle</label>
-            <select class="form-control" id="salle_id" name="salle_id" required>
-                @foreach ($salles as $salle)
-                    <option value="{{ $salle->id }}" {{ $communication->salle_id == $salle->id ? 'selected' : '' }}>{{ $salle->nom }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <!-- Champ Date -->
-        <div class="mb-3">
-            <label for="date" class="form-label">Date</label>
+            <label for="date" class="form-label">{{ __('interface.date') }}</label>
             <input type="date" class="form-control" id="date" name="date" value="{{ old('date', $communication->date) }}" required>
-            @error('date')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
         </div>
 
-        <!-- Heure Début -->
         <div class="mb-3">
-            <label for="heure_debut" class="form-label">Heure de début</label>
-            <input type="time" class="form-control" id="heure_debut" name="heure_debut" value="{{ old('heure_debut', $communication->heure_debut) }}" required>
-            @error('heure_debut')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
+            <label for="start_time" class="form-label">{{ __('interface.start_time') }}</label>
+            <input type="time" class="form-control" id="start_time" name="start_time" value="{{ old('start_time', $communication->start_time) }}" required>
         </div>
 
-        <!-- Heure Fin -->
         <div class="mb-3">
-            <label for="heure_fin" class="form-label">Heure de fin</label>
-            <input type="time" class="form-control" id="heure_fin" name="heure_fin" value="{{ old('heure_fin', $communication->heure_fin) }}" required>
-            @error('heure_fin')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
+            <label for="end_time" class="form-label">{{ __('interface.end_time') }}</label>
+            <input type="time" class="form-control" id="end_time" name="end_time" value="{{ old('end_time', $communication->end_time) }}" required>
         </div>
 
-        <!-- Orateurs -->
         <div class="mb-3">
-            <label for="orateurs" class="form-label">Orateurs</label>
-            <select class="form-control" id="orateurs" name="orateurs[]" multiple>
-                @foreach ($orateurs as $orateur)
-                    <option value="{{ $orateur->id }}" {{ in_array($orateur->id, $communication->orateurs->pluck('id')->toArray()) ? 'selected' : '' }}>
-                        {{ $orateur->nom_complet }}
+            <label for="type" class="form-label">{{ __('interface.type') }}</label>
+            <input type="text" class="form-control" id="type" name="type" value="{{ old('type', $communication->type) }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="program_session_id" class="form-label">{{ __('interface.program_session') }}</label>
+            <select class="form-select" id="program_session_id" name="program_session_id">
+                <option value="">{{ __('interface.select') }}</option>
+                @foreach($programSessions as $session)
+                    <option value="{{ $session->id }}" {{ old('program_session_id', $communication->program_session_id) == $session->id ? 'selected' : '' }}>
+                        {{ $session->name }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Mettre à jour</button>
-    </form>
+        <div class="mb-3">
+            <label for="room_id" class="form-label">{{ __('interface.room') }}</label>
+            <select class="form-select" id="room_id" name="room_id">
+                <option value="">{{ __('interface.select') }}</option>
+                @foreach($rooms as $room)
+                    <option value="{{ $room->id }}" {{ old('room_id', $communication->room_id) == $room->id ? 'selected' : '' }}>
+                        {{ $room->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
+        <div class="mb-3">
+            <label for="speakers" class="form-label">{{ __('interface.speakers') }}</label>
+            <select class="form-select" id="speakers" name="speakers[]" multiple size="5">
+                @foreach($speakers as $speaker)
+                    <option value="{{ $speaker->id }}"
+                        {{ collect(old('speakers', $communication->speakers->pluck('id')))->contains($speaker->id) ? 'selected' : '' }}>
+                        {{ $speaker->name }}
+                    </option>
+                @endforeach
+            </select>
+            <small class="text-muted">{{ __('interface.multi_select_hint') }}</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="sponsors" class="form-label">{{ __('interface.sponsors') }}</label>
+            <select class="form-select" id="sponsors" name="sponsors[]" multiple size="5">
+                @foreach($sponsors as $sponsor)
+                    <option value="{{ $sponsor->id }}"
+                        {{ collect(old('sponsors', $communication->sponsors->pluck('id')))->contains($sponsor->id) ? 'selected' : '' }}>
+                        {{ $sponsor->full_name }}
+                    </option>
+                @endforeach
+            </select>
+            <small class="text-muted">{{ __('interface.multi_select_hint') }}</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ __('interface.update') }}</button>
+    </form>
 </div>
 @endsection

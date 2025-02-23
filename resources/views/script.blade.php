@@ -25,4 +25,16 @@
             'alwaysShowNavOnTouchDevices': true
         });
     </script> -->
+    <script>
+        function showEditForm(questionId) {
+            document.getElementById('view-question-' + questionId).style.display = 'none';
+            document.getElementById('edit-question-' + questionId).style.display = 'block';
+        }
+
+        function hideEditForm(questionId) {
+            document.getElementById('edit-question-' + questionId).style.display = 'block';
+            document.getElementById('edit-question-' + questionId).style.display = 'none';
+        }
+    </script>
+
 </body>
