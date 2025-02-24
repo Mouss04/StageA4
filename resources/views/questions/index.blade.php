@@ -55,7 +55,7 @@
                             <br>
                             <small>{{ __('interface.communication') }}: {{ $question->communication->title ?? __('interface.not_specified') }}</small>
                             @if ($question->speaker)
-                            <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->name }}</small>
+                            <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->full_name }}</small>
                             @endif
                             @if(auth()->check() && auth()->user()->can('create Favorite'))
                             <x-favorite-button modelType="App\Models\Question" :modelId="$question->id" />
@@ -109,7 +109,7 @@
                         <br>
                         <small>{{ __('interface.communication') }}: {{ $question->communication->title ?? __('interface.not_specified') }}</small>
                         @if ($question->speaker)
-                        <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->name }}</small>
+                        <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->full_name }}</small>
                         @endif
                         @if(auth()->check() && auth()->user()->can('create Favorite'))
                         <x-favorite-button modelType="App\Models\Question" :modelId="$question->id" />
@@ -151,7 +151,7 @@
                         <br>
                         <small>{{ __('interface.communication') }}: {{ $question->communication->title ?? __('interface.not_specified') }}</small>
                         @if ($question->speaker)
-                        <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->name }}</small>
+                        <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->full_name }}</small>
                         @endif
                         <strong>{{ __('interface.answer') }}:</strong>
                         <p>{{ $question->answer ?? __('interface.no_answer') }}</p>
@@ -185,7 +185,7 @@
                             <br>
                             <small>{{ __('interface.communication') }}: {{ $question->communication->title ?? __('interface.not_specified') }}</small>
                             @if ($question->speaker)
-                            <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->name }}</small>
+                            <br><small>{{ __('interface.speaker') }}: {{ $question->speaker->full_name }}</small>
                             @endif
                             @if(auth()->check() && auth()->user()->can('create Favorite'))
                             <x-favorite-button modelType="App\Models\Question" :modelId="$question->id" />

@@ -195,5 +195,6 @@ return [
     'services' => 'الخدمات',
     'pharmaceutical_industry_suppliers' => 'موردو صناعة الأدوية',
     'institutions_partners' => 'المؤسسات والشركات والشركاء الاجتماعيين',
-
+    'speaker_optional' => 'المتحدث (اختياري)',
+    'room' => 'غرفة'
 ];

@@ -25,21 +25,21 @@ class SendGeneratedPassword extends Mailable
         $this->qrCodePath = "qrcodes/user_{$user->id}.png";
 
         // Generate QR Code with a verification link
-        //$qrCodeData = route('verify.qr', ['id' => $user->id]);
-        //$qrCodeImage = QrCode::format('png')->size(300)->generate($qrCodeData);
+        $qrCodeData = route('verify.qr', ['id' => $user->id]);
+        $qrCodeImage = QrCode::format('png')->size(300)->generate($qrCodeData);
 
         // Ensure the 'qrcodes' directory exists in public storage
-        //Storage::disk('public')->put($this->qrCodePath, $qrCodeImage);
+        Storage::disk('public')->put($this->qrCodePath, $qrCodeImage);
     }
 
     public function build()
     {
         return $this->subject('Your Account Details')
                     ->view('emails.generated_password')
-                    //->attach(public_path("storage/" . $this->qrCodePath), [
-                    //    'as' => 'qrcode.png',
-                    //    'mime' => 'image/png',
-                    //])
+                    ->attach(public_path("storage/" . $this->qrCodePath), [
+                       'as' => 'qrcode.png',
+                       'mime' => 'image/png',
+                    ])
                 ;
     }
 }

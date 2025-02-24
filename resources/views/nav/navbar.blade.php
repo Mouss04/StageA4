@@ -1,13 +1,32 @@
 <head>
     <style>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .container-fluid {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+        }
+
+        .navbar .navbar-brand {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: #e0e0e0;
+        }
+
         .dropdown-toggle-text {
             color: #ff5733;
-            /* Couleur personnalisée */
         }
     </style>
 </head>
-
-<!-- Navbar principale (en haut) -->
 <nav class="navbar">
     <div class="container-fluid d-flex align-items-center">
         <!-- Bouton de toggle pour le menu (mobile) -->
@@ -18,8 +37,8 @@
         @endif
 
         <!-- Titre de la navbar (centré) -->
-        <div class="text-center flex-grow-1">
-            <a class="navbar-brand fw-bold text-uppercase" href="{{ route('home') }}" style="font-size: 1.8rem; letter-spacing: 1px; color: #e0e0e0;">
+        <div class="text-center">
+            <a class="navbar-brand fw-bold text-uppercase" href="{{ route('home') }}">
                 {{ config('app.name') }}
             </a>
         </div>

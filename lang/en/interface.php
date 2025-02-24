@@ -195,5 +195,6 @@ return [
     'services' => 'Services',
     'pharmaceutical_industry_suppliers' => 'Pharmaceutical Industry Suppliers',
     'institutions_partners' => 'Institutions, Corporations & Social Partners',
-
+    'speaker_optional' => 'Speaker (Optional)',
+    'room' => 'Room'
 ];
